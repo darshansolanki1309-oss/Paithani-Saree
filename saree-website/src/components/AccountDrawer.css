@@ -1,0 +1,48 @@
+.account-drawer {
+  position: absolute;
+  top: 65px; /* Sits just below the navbar icon */
+  right: 0;
+  width: 250px; /* A good width for a dropdown */
+  background-color: var(--dark-bg);
+  border: 1px solid var(--gray-light);
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.drawer-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--gray-light);
+}
+
+.drawer-email {
+  color: var(--light-white);
+  font-size: 1rem;
+  font-weight: 700;
+  /* This prevents long emails from breaking the layout */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.drawer-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.drawer-item {
+  color: var(--light-white);
+  padding: 1rem;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.drawer-item:hover {
+  color: var(--primary-orange);
+  background-color: var(--gray-light);
+}

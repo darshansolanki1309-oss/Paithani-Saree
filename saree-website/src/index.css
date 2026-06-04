@@ -1,0 +1,43 @@
+/* 1. Import the new Google Font 'Inter' */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* 2. Define NEW Light Theme Colors (more minimalist) */
+:root {
+  --primary-color: #000000; /* Main black for buttons and dark text */
+  --primary-blue: #002D62;  /* Navy blue for headings */
+  --accent-gold: #f39c12;   /* --- NEW GOLD/MARIGOLD COLOR --- */
+  --light-bg: #ffffff;
+  --dark-text: #1a1a1a;     /* A slightly softer black for text */
+  --gray-medium: #555;     /* Medium gray for subtitles */
+  --gray-light: #eaeaea;   /* Light gray for borders and backgrounds */
+}
+
+/* ADDED FOR SMOOTH SCROLLING */
+html {
+  scroll-behavior: smooth;
+}
+
+/* 3. Apply Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  /* 4. Set the new font family */
+  font-family: 'Inter', sans-serif;
+  background-color: var(--light-bg);
+  color: var(--dark-text);
+  min-height: 100vh;
+}
+
+/* 5. Global Loading Message Style (from SearchPage) */
+.loading-message {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--dark-text);
+  text-align: center;
+  grid-column: 1 / -1; 
+  margin-top: 2rem;
+}

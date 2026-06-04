@@ -1,0 +1,138 @@
+/* 1. Navbar Container */
+.navbar {
+  background-color: var(--light-bg);
+  border-bottom: 1px solid var(--gray-light);
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 80px;
+  width: 100%;
+  max-width: 1300px;
+  padding: 0 2rem;
+}
+
+/* --- THIS BLOCK IS CHANGED --- */
+/* 2. Logo */
+.navbar-logo-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%; /* Make the link fill the 80px height */
+}
+
+.navbar-logo-image {
+  height: 60px; /* FIXED: Set to 60px (less than the 80px navbar) */
+  width: auto;
+  object-fit: contain;
+}
+/* --- END OF CHANGE --- */
+
+
+/* 3. NEW Center Navigation Links */
+.nav-menu-center {
+  display: flex;
+  list-style: none;
+  gap: 2.5rem;
+}
+
+.nav-links-center {
+  color: var(--gray-medium);
+  text-decoration: none;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  transition: color 0.3s ease;
+}
+
+.nav-links-center:hover {
+  color: var(--dark-text);
+}
+
+/* 4. Right Side Icons */
+.nav-icons {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.nav-icon-link,
+.cart-button {
+  color: var(--dark-text);
+  font-size: 1.25rem;
+  transition: color 0.2s ease;
+  position: relative; 
+  display: flex;
+  align-items: center;
+}
+
+.cart-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.nav-icon-link:hover,
+.cart-button:hover {
+  color: var(--gray-medium);
+}
+
+/* 5. Cart Badge */
+.cart-badge {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background-color: var(--dark-text);
+  color: var(--light-bg);
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+}
+
+/* 6. Clerk User Button / Icon */
+.nav-icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--dark-text);
+  font-size: 1.25rem;
+  transition: color 0.2s ease;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.nav-icon-button:hover {
+  color: var(--gray-medium);
+}
+
+.nav-user-button {
+  display: flex;
+  align-items: center;
+}
+
+/* 7. Responsive: Hide center links on mobile */
+@media (max-width: 768px) {
+  .nav-menu-center {
+    display: none;
+  }
+  .navbar-container {
+    justify-content: space-between;
+  }
+}
