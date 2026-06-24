@@ -12,7 +12,7 @@ function Orders() {
   }, []);
 
   const fetchOrders = () => {
-    fetch('http://localhost:5001/api/admin/orders')
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/admin/orders`)
       .then(res => res.json())
       .then(data => {
         setOrders(data);
@@ -27,7 +27,7 @@ function Orders() {
   // Handle Status Update (Accept/Deny)
   const handleStatusUpdate = async (orderId, newStatus) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/admin/orders/${orderId}/status`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/admin/orders/${orderId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
@@ -114,11 +114,4 @@ function Orders() {
               </div>
 
             </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-}
-
-export default Orders;
+          )

@@ -13,7 +13,7 @@ function Dashboard() {
 
   // Fetch stats from your Node.js server
   useEffect(() => {
-    fetch('http://localhost:5001/api/admin/stats')
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/admin/stats`)
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(err => console.error("Failed to load stats", err));
@@ -84,8 +84,4 @@ function Dashboard() {
           </ResponsiveContainer>
         </div>
       </div>
-    </div>
-  );
-}
-
-export default Dashboard;
+    </div>

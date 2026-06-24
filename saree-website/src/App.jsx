@@ -6,7 +6,7 @@ import { useUser } from '@clerk/clerk-react';
 import CartDrawer from './components/CartDrawer';
 import './components/Footer.css'; 
 
-const API_URL = 'http://localhost:5001';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 function App() {
   // 1. Cart is now just a local array, not fetched from DB
@@ -112,8 +112,4 @@ function App() {
           </div>
         </div>
       </footer>
-    </div>
-  )
-}
-
-export default App;
+    <
