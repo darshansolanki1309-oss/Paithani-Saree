@@ -1,0 +1,7 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "saree-website/dist",
+  "installCommand": "cd saree-website && npm install",
+  "framework": "vite",
+  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
+}
