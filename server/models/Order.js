@@ -10,7 +10,6 @@ const orderSchema = new mongoose.Schema({
       imageUrl: { type: String, required: true }
     }
   ],
-  // New field to store the address form data
   userDetails: {
     firstName: String,
     lastName: String,
@@ -23,4 +22,12 @@ const orderSchema = new mongoose.Schema({
     default: 'Processing',
     enum: ['Processing', 'Accepted', 'Cancelled', 'Delivered'],
   },
-  createdAt: {
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const Order = mongoose.model('Order', orderSchema);
+
+export default Order;
