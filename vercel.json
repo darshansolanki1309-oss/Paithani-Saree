@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "cd saree-website && npm run build",
   "outputDirectory": "saree-website/dist",
   "installCommand": "cd saree-website && npm install",
   "framework": "vite",
