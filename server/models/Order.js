@@ -18,12 +18,9 @@ const orderSchema = new mongoose.Schema({
     address: String,
     paymentMethod: String,
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
+  status: {
+    type: String,
+    default: 'Processing',
+    enum: ['Processing', 'Accepted', 'Cancelled', 'Delivered'],
   },
-});
-
-const Order = mongoose.model('Order', orderSchema);
-
-export default Order;
+  createdAt: {
