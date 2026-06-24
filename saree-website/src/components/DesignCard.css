@@ -1,116 +1,124 @@
+/* Design Card — 3D spatial card with premium overlay */
 .design-card-masonry {
   position: relative;
   width: 100%;
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 4px 16px rgba(12, 26, 53, 0.08), 0 1px 4px rgba(12, 26, 53, 0.04);
   cursor: pointer;
+  will-change: transform;
+  background: var(--bg-white);
 }
 
-.design-card-masonry:hover {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  transform: translateY(-4px);
-}
-
-/* --- NEW STYLE FOR THE WRAPPER --- */
+/* Image wrapper — portrait aspect ratio */
 .card-image-wrapper {
   width: 100%;
-  aspect-ratio: 4 / 5; /* This creates a 4:5 portrait shape */
+  aspect-ratio: 4 / 5;
   overflow: hidden;
-  background-color: #f0f0f0; /* Placeholder color while image loads */
+  background: #f0ece4;
   position: relative;
 }
 
-.price-badge {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  padding: 0.35rem 0.6rem;
-  background: rgba(255, 255, 255, 0.9);
-  color: #1a1a1a;
-  font-family: 'Sahitya', serif;
-  font-size: 0.9rem;
-  font-weight: 700;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-}
-
-/* --- MODIFIED IMAGE STYLE --- */
+/* Actual image */
 .card-image-masonry {
   width: 100%;
-  height: 100%; /* Make image fill the wrapper */
-  object-fit: cover; /* Crop image to fit, don't stretch */
+  height: 100%;
+  object-fit: cover;
   display: block;
+  transition: transform 0.6s ease;
+}
+.design-card-masonry:hover .card-image-masonry {
+  transform: scale(1.04);
 }
 
-/* The dark overlay that appears on hover */
+/* Specular glare — subtle light reflection following mouse */
+.card-glare {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  border-radius: inherit;
+}
+
+/* Price badge */
+.price-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 3;
+  padding: 0.35rem 0.75rem;
+  background: rgba(253, 251, 248, 0.92);
+  backdrop-filter: blur(8px);
+  color: var(--text-primary);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(12, 26, 53, 0.1);
+  border: 1px solid var(--border-gold);
+}
+
+/* Dark gradient overlay — appears on hover */
 .card-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,0.6) 100%);
+  inset: 0;
+  background: linear-gradient(180deg, rgba(12, 26, 53, 0) 50%, rgba(12, 26, 53, 0.72) 100%);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 1rem;
+  gap: 0.5rem;
+  padding: 1.1rem;
   opacity: 0;
   transition: opacity 0.3s ease;
+  z-index: 4;
 }
-
 .design-card-masonry:hover .card-overlay {
   opacity: 1;
 }
 
+/* Add to Cart button */
 .card-btn-overlay {
   width: 100%;
   padding: 0.75rem;
-  font-family: 'Sahitya', serif;
-  font-size: 1rem;
-  font-weight: 700;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  background-color: var(--primary-orange);
-  color: var(--dark-bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  transition: background-color 0.3s ease;
-}
-
-.card-btn-overlay:hover {
-  background-color: #e68e00;
-}
-
-/* View Details Button */
-.card-btn-view {
-  width: 100%;
-  padding: 0.65rem;
   font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   font-weight: 600;
-  border: 2px solid rgba(255, 255, 255, 0.8);
-  border-radius: 8px;
+  border: none;
+  border-radius: 10px;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(4px);
+  background: var(--gold);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  transition: all 0.3s ease;
+  gap: 0.45rem;
+  transition: background-color 0.25s ease;
+  letter-spacing: 0.02em;
 }
-.card-btn-view:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: #fff;
+.card-btn-overlay:hover {
+  background: var(--gold-bright);
 }
 
-/* Stack buttons in overlay */
-.card-overlay {
-  gap: 0.5rem;
-}
+/* View Details button */
+.card-btn-view {
+  width: 100%;
+  padding: 0.65rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  transition: all 0.25s ease;
+}
+.card-btn-view:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: #fff;
+}

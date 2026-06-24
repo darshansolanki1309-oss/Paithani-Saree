@@ -1,12 +1,34 @@
 import React, { useState, useRef } from 'react';
-import { FaSearch, FaArrowRight, FaFacebook, FaInstagram, FaTwitter, FaMagic } from 'react-icons/fa';
+import { FaSearch, FaArrowRight, FaMagic } from 'react-icons/fa';
 import './SearchPage.css';
 import DesignCard from '../components/DesignCard';
 import SareeDetailModal from '../components/SareeDetailModal';
-import { useInView } from 'react-intersection-observer';
-import { Link } from 'react-router-dom';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 
-// --- QUICK PROMPT SUGGESTIONS ---
+// ── Animation Variants ─────────────────────────────────────────────────────────
+const fadeUp = {
+  hidden: { opacity: 0, y: 36 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] } },
+};
+const fadeLeft = {
+  hidden: { opacity: 0, x: -40 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] } },
+};
+const fadeRight = {
+  hidden: { opacity: 0, x: 40 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] } },
+};
+const stagger = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.12 } },
+};
+const staggerFast = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.06 } },
+};
+const VP = { once: true, amount: 0.12 };
+
+// ── Data ───────────────────────────────────────────────────────────────────────
 const QUICK_PROMPTS = [
   { label: '🔴 Red Banarasi Silk', prompt: 'traditional red and gold Banarasi silk saree with intricate zari work' },
   { label: '💛 Golden Kanjivaram', prompt: 'royal golden Kanjivaram silk saree with temple border and rich pallu' },
@@ -26,247 +48,306 @@ const QUICK_PROMPTS = [
   { label: '✨ Champagne Tissue', prompt: 'shimmering champagne gold tissue saree with delicate lace border and crystals' },
 ];
 
-// --- MOCK IMAGE ARRAYS (Your exact links preserved) ---
 const heroSareeImages = [
-  "https://images.unsplash.com/photo-1609748342012-7dfce6fee14f?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fHNhcmVlJTIwaW1hZ2UlMjBpbiUyMHdoaXRlJTIwYmFja2dyb3VuZHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600",
-  "https://images.unsplash.com/photo-1736849625286-ab3267b7d508?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzV8fHNhcmVlJTIwaW1hZ2UlMjBpbiUyMHdoaXRlJTIwYmFja2dyb3VuZHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600",
-  "https://images.unsplash.com/photo-1750008560217-53fd7066acec?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NTV8fHNhcmVlJTIwaW1hZ2UlMjBpbiUyMHdoaXRlJTIwYmFja2dyb3VuZHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600",
-  "https://images.unsplash.com/photo-1711688590009-539d18c9d56f?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mzh8fHNhcmVlJTIwaW1hZ2UlMjBpbiUyMHdoaXRlJTIwYmFja2dyb3VuZHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600"
+  'https://images.unsplash.com/photo-1609748342012-7dfce6fee14f?auto=format&fit=crop&q=60&w=600',
+  'https://images.unsplash.com/photo-1736849625286-ab3267b7d508?auto=format&fit=crop&q=60&w=600',
+  'https://images.unsplash.com/photo-1750008560217-53fd7066acec?auto=format&fit=crop&q=60&w=600',
+  'https://images.unsplash.com/photo-1711688590009-539d18c9d56f?auto=format&fit=crop&q=60&w=600',
 ];
 
 const sideGalleryImages = [
-  "https://images.unsplash.com/photo-1609748342012-7dfce6fee14f?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fHNhcmVlJTIwaW1hZ2UlMjBpbiUyMHdoaXRlJTIwYmFja2dyb3VuZHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600",
-  "https://images.unsplash.com/photo-1736849625286-ab3267b7d508?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzV8fHNhcmVlJTIwaW1hZ2UlMjBpbiUyMHdoaXRlJTIwYmFja2dyb3VuZHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600",
-  "https://images.unsplash.com/photo-1750008560217-53fd7066acec?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NTV8fHNhcmVlJTIwaW1hZ2UlMjBpbiUyMHdoaXRlJTIwYmFja2dyb3VuZHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600",
-  "https://images.unsplash.com/photo-1711688590009-539d18c9d56f?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mzh8fHNhcmVlJTIwaW1hZ2UlMjBpbiUyMHdoaXRlJTIwYmFja2dyb3VuZHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600"
+  'https://images.unsplash.com/photo-1609748342012-7dfce6fee14f?auto=format&fit=crop&q=60&w=600',
+  'https://images.unsplash.com/photo-1736849625286-ab3267b7d508?auto=format&fit=crop&q=60&w=600',
+  'https://images.unsplash.com/photo-1750008560217-53fd7066acec?auto=format&fit=crop&q=60&w=600',
+  'https://images.unsplash.com/photo-1711688590009-539d18c9d56f?auto=format&fit=crop&q=60&w=600',
 ];
 
-// We'll keep this array in case the API fails and we want to show mocks
 const mockSareeImages = [
-  "https://images.unsplash.com/photo-1610189019555-b1e26c2e424d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Njd8fHNhcmVlJTIwaW1hZ2UlMjBpbiUyMHdoaXRlJTIwYmFja2dyb3VuZHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600",
-  "https://images.unsplash.com/photo-1609748340756-aeb8223d6c64?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NzV8fHNhcmVlJTIwaW1hZ2UlMjBpbiUyMHdoaXRlJTIwYmFja2dyb3VuZHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600",
-  "https://images.unsplash.com/photo-1710967356986-f40445106d24?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTAxfHxzYXJlZSUyMGltYWdlJTIwaW4lMjB3aGl0ZSUyMGJhY2tncm91bmR8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600",
-  "https://images.unsplash.com/photo-1752469145295-3146b95cb544?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OTh8fHNhcmVlJTIwaW1hZ2UlMjBpbiUyMHdoaXRlJTIwYmFja2dyb3VuZHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600",
+  'https://images.unsplash.com/photo-1610189019555-b1e26c2e424d?auto=format&fit=crop&q=60&w=600',
+  'https://images.unsplash.com/photo-1609748340756-aeb8223d6c64?auto=format&fit=crop&q=60&w=600',
+  'https://images.unsplash.com/photo-1710967356986-f40445106d24?auto=format&fit=crop&q=60&w=600',
+  'https://images.unsplash.com/photo-1752469145295-3146b95cb544?auto=format&fit=crop&q=60&w=600',
 ];
 
-// --- COMPONENT START ---
-
+// ── Component ──────────────────────────────────────────────────────────────────
 function SearchPage({ isLoggedIn, onAddToCart, userId }) {
-  // --- STATE ---
   const [prompt, setPrompt] = useState('');
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  // --- MODAL STATE ---
   const [modalData, setModalData] = useState(null);
 
-  const handleCardClick = (designData) => {
-    setModalData(designData);
-  };
-  const handleCloseModal = () => {
-    setModalData(null);
-  };
-
-  // --- REFS ---
   const searchBarRef = useRef(null);
-  const descriptionSectionRef = useRef(null);
-  const featuresSectionRef = useRef(null); // Added ref for Features section
 
-  // --- API/Search Function (Puter.js — FREE, no API key needed) ---
-  const getRandomPrice = () => {
-    const min = 2000;
-    const max = 6000;
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  };
+  // Scroll parallax
+  const { scrollY } = useScroll();
+  const heroGalleryY = useTransform(scrollY, [0, 600], [0, -60]);
+  const heroTextY = useTransform(scrollY, [0, 600], [0, -30]);
+
+  const handleCardClick = (data) => setModalData(data);
+  const handleCloseModal = () => setModalData(null);
+  const scrollToSearch = () => searchBarRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const getRandomPrice = () => Math.floor(Math.random() * (6000 - 2000 + 1)) + 2000;
 
   const handleSearch = async () => {
     if (!prompt) return;
-
     setIsLoading(true);
     setResults([]);
     setError(null);
-    console.log("Generating images via Puter.js for:", prompt);
-
     const NUM_IMAGES = 4;
     const enhancedPrompt = `photorealistic full-body portrait of a beautiful Indian woman model wearing an elegant draped Saree, studio lighting, fashion photography, ${prompt}`;
-
     if (!window.puter || !window.puter.ai) {
       setError('Puter.js is still loading. Please wait a moment and try again.');
       setIsLoading(false);
       return;
     }
-
     try {
-      // Generate images one at a time to avoid rate limits
       for (let i = 0; i < NUM_IMAGES; i++) {
         try {
           const imgEl = await window.puter.ai.txt2img(enhancedPrompt, { model: 'flux-schnell' });
-          const design = {
-            id: `${Date.now()}-${i}`,
-            imageUrl: imgEl.src,
-            price: getRandomPrice()
-          };
-          // Show each image as it arrives
-          setResults(prev => [...prev, design]);
+          setResults(prev => [...prev, { id: `${Date.now()}-${i}`, imageUrl: imgEl.src, price: getRandomPrice() }]);
         } catch (singleErr) {
-          console.warn(`Image ${i + 1} failed, skipping:`, singleErr);
+          console.warn(`Image ${i + 1} failed:`, singleErr);
         }
-        // Small delay between requests to avoid rate limiting
-        if (i < NUM_IMAGES - 1) {
-          await new Promise(r => setTimeout(r, 1500));
-        }
+        if (i < NUM_IMAGES - 1) await new Promise(r => setTimeout(r, 1500));
       }
-      console.log("Image generation complete.");
-
     } catch (err) {
-      console.error("Image generation failed:", err);
       setError(`Failed to generate images. Reason: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // --- Scroll handlers and Animation Hooks ---
-  const scrollToSearch = () => { searchBarRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); };
-  const scrollToDescription = () => { descriptionSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
-  const { ref: heroRef, inView: heroIsVisible } = useInView({ triggerOnce: false, threshold: 0.1 });
-  const { ref: gridRef, inView: gridIsVisible } = useInView({ triggerOnce: false, threshold: 0.1 });
-  const { ref: descriptionInViewRef, inView: descriptionIsVisible } = useInView({ triggerOnce: false, threshold: 0.1 });
-  const { ref: empoweringRef, inView: empoweringIsVisible } = useInView({ triggerOnce: false, threshold: 0.1 });
-  const { ref: statsRef, inView: statsIsVisible } = useInView({ triggerOnce: false, threshold: 0.1 });
-  const { ref: solutionsRef, inView: solutionsIsVisible } = useInView({ triggerOnce: false, threshold: 0.1 });
-  const { ref: galleryRef, inView: galleryIsVisible } = useInView({ triggerOnce: false, threshold: 0.1 });
-  const { ref: testimonialRef, inView: testimonialIsVisible } = useInView({ triggerOnce: false, threshold: 0.1 });
-  const { ref: finalCtaRef, inView: finalCtaIsVisible } = useInView({ triggerOnce: false, threshold: 0.1 });
-  const { ref: aboutRef, inView: aboutIsVisible } = useInView({ triggerOnce: false, threshold: 0.1 });
-  const { ref: promptChipsRef, inView: promptChipsIsVisible } = useInView({ triggerOnce: false, threshold: 0.1 });
-
-  // --- Quick prompt handler ---
   const handleQuickPrompt = (quickPrompt) => {
     setPrompt(quickPrompt);
-    // Auto-trigger search
     searchBarRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    // Small delay so user sees the prompt fill in
-    setTimeout(() => {
-      document.querySelector('.prompt-button-new')?.click();
-    }, 400);
+    setTimeout(() => document.querySelector('.prompt-button-new')?.click(), 400);
   };
 
-  // --- JSX RENDER ---
   return (
     <div className="search-page-container">
 
-      {/* 1. Hero Section */}
-      <div ref={heroRef} className={`hero-section-new fade-in-section ${heroIsVisible ? 'is-visible' : ''}`}>
-        <div className="hero-lockup">{/* ... */}</div>
-        <h1>Design Your Dream Saree with AI</h1>
-        <p className="hero-subtitle-new">
-          Use our generative AI to create unique, intricate Saree designs.
-          From traditional Paithani to modern digital prints, transform your vision into reality.
-        </p>
-        <div className="hero-buttons">
-          <button className="btn btn-primary" onClick={scrollToSearch}>Try It Now</button>
-          <button className="btn btn-secondary" onClick={scrollToDescription}>Learn More</button>
-        </div>
-        <div className="hero-image-gallery">
-          <img src={heroSareeImages[0]} alt="Saree 1" className="hero-gallery-img img-1" />
-          <img src={heroSareeImages[1]} alt="Saree 2" className="hero-gallery-img img-2" />
-          <img src={heroSareeImages[2]} alt="Saree 3" className="hero-gallery-img img-3" />
-          <img src={heroSareeImages[3]} alt="Saree 4" className="hero-gallery-img img-4" />
-        </div>
-      </div>
+      {/* ── 1. HERO ──────────────────────────────────────────────────────────── */}
+      <section className="hero-section-new">
+        {/* Left: text */}
+        <motion.div
+          className="hero-text-content"
+          style={{ y: heroTextY }}
+          variants={stagger}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div variants={fadeUp} className="hero-eyebrow">
+            <span className="hero-tag">✦ AI-Powered Design</span>
+          </motion.div>
+          <motion.h1 variants={fadeUp}>
+            Design Your Dream<br /><em>Saree</em> with AI
+          </motion.h1>
+          <motion.p variants={fadeUp} className="hero-subtitle-new">
+            Use generative AI to create unique, intricate Saree designs —
+            from traditional Paithani to modern digital prints.
+          </motion.p>
+          <motion.div variants={fadeUp} className="hero-buttons">
+            <motion.button
+              className="btn btn-primary"
+              onClick={scrollToSearch}
+              whileHover={{ scale: 1.04, boxShadow: '0 10px 36px rgba(184, 134, 42, 0.38)' }}
+              whileTap={{ scale: 0.97 }}
+            >
+              Try It Now
+            </motion.button>
+            <motion.a
+              href="#features"
+              className="btn btn-secondary"
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              Learn More
+            </motion.a>
+          </motion.div>
+        </motion.div>
 
-      {/* 3. Prompt Container */}
-      <div className="prompt-container-new" ref={searchBarRef}>
+        {/* Right: spatial floating images */}
+        <motion.div className="hero-image-gallery" style={{ y: heroGalleryY }}>
+          <motion.img
+            src={heroSareeImages[0]} alt="Saree 1"
+            className="hero-gallery-img img-1"
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          />
+          <motion.img
+            src={heroSareeImages[1]} alt="Saree 2"
+            className="hero-gallery-img img-2"
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.45, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          />
+          <motion.img
+            src={heroSareeImages[2]} alt="Saree 3"
+            className="hero-gallery-img img-3"
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.38, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          />
+          <motion.img
+            src={heroSareeImages[3]} alt="Saree 4"
+            className="hero-gallery-img img-4"
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.55, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          />
+        </motion.div>
+      </section>
+
+      {/* ── 2. SEARCH BAR ────────────────────────────────────────────────────── */}
+      <motion.div
+        className="prompt-container-new"
+        ref={searchBarRef}
+        initial={{ opacity: 0, y: 28 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={VP}
+        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      >
         <div className="prompt-input-wrapper-new">
           <FaSearch className="prompt-icon-new" />
           <input
             type="text"
             className="prompt-input-new"
-            placeholder="e.g., 'traditional red and gold Banarasi style', 'modern floral print'..."
+            placeholder="e.g., 'traditional red and gold Banarasi style'…"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           />
         </div>
-        <button className="prompt-button-new" onClick={handleSearch} disabled={isLoading}>
-          {isLoading ? 'Generating...' : 'Generate'}
-        </button>
-      </div>
+        <motion.button
+          className="prompt-button-new"
+          onClick={handleSearch}
+          disabled={isLoading}
+          whileHover={{ scale: 1.03, boxShadow: '0 8px 28px rgba(184, 134, 42, 0.35)' }}
+          whileTap={{ scale: 0.97 }}
+        >
+          {isLoading ? 'Generating…' : 'Generate'}
+        </motion.button>
+      </motion.div>
 
-      {/* 3.5. Quick Prompts Section */}
-      <div ref={promptChipsRef} className={`quick-prompts-section fade-in-section ${promptChipsIsVisible ? 'is-visible' : ''}`}>
-        <div className="quick-prompts-header">
+      {/* ── 3. QUICK PROMPTS ─────────────────────────────────────────────────── */}
+      <motion.div
+        className="quick-prompts-section"
+        variants={stagger}
+        initial="hidden"
+        whileInView="visible"
+        viewport={VP}
+      >
+        <motion.div variants={fadeUp} className="quick-prompts-header">
           <FaMagic className="quick-prompts-icon" />
           <h3>Quick Design Ideas</h3>
-          <p>Tap any prompt below to instantly generate stunning saree designs</p>
-        </div>
-        <div className="quick-prompts-grid">
+          <p>Tap any prompt to instantly generate stunning saree designs</p>
+        </motion.div>
+        <motion.div className="quick-prompts-grid" variants={staggerFast}>
           {QUICK_PROMPTS.map((qp, index) => (
-            <button
+            <motion.button
               key={index}
               className="quick-prompt-chip"
+              variants={fadeUp}
+              whileHover={{ scale: 1.05, y: -3, boxShadow: '0 8px 24px rgba(184, 134, 42, 0.22)' }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => handleQuickPrompt(qp.prompt)}
               disabled={isLoading}
             >
               {qp.label}
-            </button>
+            </motion.button>
           ))}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      {/* 4. Results Grid */}
-      <div ref={gridRef} className={`masonry-grid fade-in-section ${gridIsVisible ? 'is-visible' : ''}`}>
-        {isLoading && <p className="loading-message">Generating your designs... (This may take a moment)</p>}
+      {/* ── 4. RESULTS GRID ──────────────────────────────────────────────────── */}
+      <div className="masonry-grid">
+        <AnimatePresence>
+          {isLoading && (
+            <motion.p
+              className="loading-message"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              Weaving your designs with AI… this may take a moment ✦
+            </motion.p>
+          )}
+        </AnimatePresence>
         {error && <p className="error-message">{error}</p>}
         {!isLoading && !error && results.map((design, index) => (
-          <DesignCard
+          <motion.div
             key={design.id}
-            imageUrl={design.imageUrl}
-            price={design.price}
-            isLoggedIn={isLoggedIn}
-            onAddToCart={onAddToCart}
-            userId={userId}
-            onCardClick={handleCardClick}
-          />
+            initial={{ opacity: 0, y: 30, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: index * 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <DesignCard
+              imageUrl={design.imageUrl}
+              price={design.price}
+              isLoggedIn={isLoggedIn}
+              onAddToCart={onAddToCart}
+              userId={userId}
+              onCardClick={handleCardClick}
+            />
+          </motion.div>
         ))}
       </div>
 
-      {/* 5. Description Section ("Inspired by Tradition") */}
-      <div
-        ref={(node) => {
-          descriptionSectionRef.current = node;
-          descriptionInViewRef(node);
-        }}
-        className={`description-and-gallery-section fade-in-section ${descriptionIsVisible ? 'is-visible' : ''}`}
-        id="features" // Added id for nav link
+      {/* ── 5. TRADITION SECTION ─────────────────────────────────────────────── */}
+      <motion.div
+        className="description-and-gallery-section"
+        id="features"
+        variants={stagger}
+        initial="hidden"
+        whileInView="visible"
+        viewport={VP}
       >
-        <div className="description-content">
-          <h2>Inspired by Tradition, Designed by AI</h2>
+        <motion.div variants={fadeLeft} className="description-content">
+          <span className="section-eyebrow">Our Philosophy</span>
+          <h2>Inspired by Tradition,<br />Designed by AI</h2>
           <p>
-            Welcome to the future of textile design. Our AI analyzes thousands of traditional motifs,
-            color palettes, and weaving patterns to generate entirely new Saree designs that
-            honor heritage while pushing creative boundaries.
+            Our AI analyses thousands of traditional motifs, colour palettes, and weaving
+            patterns to generate entirely new Saree designs that honour heritage while
+            pushing creative boundaries.
           </p>
-          <button className="get-started-button" onClick={scrollToSearch}>Get Started with AI</button>
-        </div>
-        <div className="side-image-gallery">
-          {sideGalleryImages.map((imgSrc, index) => (
-            <img key={index} src={imgSrc} alt={`Saree design example ${index + 1}`} className="gallery-image" />
+          <motion.button
+            className="get-started-button"
+            onClick={scrollToSearch}
+            whileHover={{ scale: 1.03, boxShadow: '0 8px 28px rgba(184, 134, 42, 0.3)' }}
+            whileTap={{ scale: 0.97 }}
+          >
+            Get Started with AI
+          </motion.button>
+        </motion.div>
+        <motion.div variants={fadeRight} className="side-image-gallery">
+          {sideGalleryImages.map((src, i) => (
+            <motion.img
+              key={i} src={src} alt={`Saree ${i + 1}`} className="gallery-image"
+              whileHover={{ scale: 1.05, boxShadow: '0 12px 40px rgba(12, 26, 53, 0.18)' }}
+              transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+            />
           ))}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      {/* 6. Empowering Section */}
-      <div ref={empoweringRef} className={`empowering-section fade-in-section ${empoweringIsVisible ? 'is-visible' : ''}`}>
-        <div className="empowering-image-stack">
+      {/* ── 6. EMPOWERING ────────────────────────────────────────────────────── */}
+      <motion.div
+        className="empowering-section"
+        variants={stagger}
+        initial="hidden"
+        whileInView="visible"
+        viewport={VP}
+      >
+        <motion.div variants={fadeLeft} className="empowering-image-stack">
           <img src={sideGalleryImages[0]} alt="Saree 1" className="stack-img stack-img-1" />
           <img src={sideGalleryImages[1]} alt="Saree 2" className="stack-img stack-img-2" />
           <img src={sideGalleryImages[2]} alt="Saree 3" className="stack-img stack-img-3" />
-        </div>
-        <div className="empowering-content">
-          <h2>Empowering Weavers and Designers</h2>
+        </motion.div>
+        <motion.div variants={fadeRight} className="empowering-content">
+          <span className="section-eyebrow">For Artisans</span>
+          <h2>Empowering Weavers<br />and Designers</h2>
           <p>
             Our platform provides powerful AI tools for artisans, designers, and enthusiasts.
             Generate production-ready digital proofs, experiment with endless variations,
@@ -274,147 +355,212 @@ function SearchPage({ isLoggedIn, onAddToCart, userId }) {
           </p>
           <h3>From Concept to Loom</h3>
           <p>
-            Whether you're exploring complex Banarasi brocades or minimalist Kanjivaram concepts,
-            our AI assists at every step. Create, refine, and export.
+            Whether exploring complex Banarasi brocades or minimalist Kanjivaram concepts,
+            our AI assists at every step.
           </p>
           <ul className="features-list">
             <li>AI Pattern Generation</li>
             <li>Virtual Draping Models</li>
-            <li>Color Palette Exploration</li>
+            <li>Colour Palette Exploration</li>
           </ul>
-          <button className="btn btn-primary" onClick={scrollToSearch}>Try Now</button>
-        </div>
-      </div>
+          <motion.button
+            className="btn btn-primary"
+            onClick={scrollToSearch}
+            whileHover={{ scale: 1.03, boxShadow: '0 8px 28px rgba(184, 134, 42, 0.3)' }}
+            whileTap={{ scale: 0.97 }}
+          >
+            Try Now
+          </motion.button>
+        </motion.div>
+      </motion.div>
 
-      {/* 7. Data Stats Section */}
-      <div ref={statsRef} className={`data-stats-section fade-in-section ${statsIsVisible ? 'is-visible' : ''}`}>
-        <div className="data-stats-header">
+      {/* ── 7. DATA STATS ────────────────────────────────────────────────────── */}
+      <motion.div
+        className="data-stats-section"
+        variants={stagger}
+        initial="hidden"
+        whileInView="visible"
+        viewport={VP}
+      >
+        <motion.div variants={fadeUp} className="data-stats-header">
+          <span className="section-eyebrow section-eyebrow--light">By the Numbers</span>
           <h2>Data-Driven Saree Design</h2>
-          <p>
-            Our AI is trained on a vast dataset of heritage textiles, ensuring
-            every generated design is unique and culturally informed.
+          <p>Our AI is trained on a vast dataset of heritage textiles, ensuring every generated design is unique and culturally informed.</p>
+        </motion.div>
+        <motion.div className="data-stats-grid" variants={staggerFast}>
+          {[
+            { num: '2B+', label: 'Designs Generated' },
+            { num: '200K+', label: 'Supported Artisans' },
+            { num: '10M+', label: 'Unique Motifs' },
+            { num: '50+', label: 'Weave Traditions' },
+          ].map((stat, i) => (
+            <motion.div key={i} className="stat-item" variants={fadeUp}>
+              <h3>{stat.num}</h3>
+              <p>{stat.label}</p>
+            </motion.div>
+          ))}
+        </motion.div>
+      </motion.div>
+
+      {/* ── 8. AI SOLUTIONS ──────────────────────────────────────────────────── */}
+      <motion.div
+        className="ai-solutions-section"
+        variants={stagger}
+        initial="hidden"
+        whileInView="visible"
+        viewport={VP}
+      >
+        <motion.div variants={fadeUp}>
+          <span className="section-eyebrow">What We Offer</span>
+          <h2>Our Saree AI Toolkit</h2>
+          <p className="section-subtitle">
+            A suite of specialised AI tools built from the ground up for textile and ethnic wear design.
           </p>
-        </div>
-        <div className="data-stats-grid">
-          <div className="stat-item"><h3>2B+</h3><p>Saree Designs Generated</p></div>
-          <div className="stat-item"><h3>200K+</h3><p>Supported Artisans</p></div>
-          <div className="stat-item"><h3>10M+</h3><p>Unique Motifs Created</p></div>
-          <div className="stat-item"><h3>1Note</h3><p>Patterns Analyzed</p></div>
-        </div>
-      </div>
+        </motion.div>
+        <motion.div className="solutions-grid" variants={staggerFast}>
+          {[
+            { img: sideGalleryImages[0], title: 'AI Motif Generator', desc: 'Create intricate new motifs — buttas, borders, pallus — from a simple text prompt.' },
+            { img: sideGalleryImages[1], title: 'Virtual Saree Draper', desc: 'See your generated design draped on a virtual model in real-time.' },
+            { img: sideGalleryImages[2], title: 'AI Colorway Creator', desc: 'Instantly explore dozens of harmonious colour combinations for your design.' },
+          ].map((card, i) => (
+            <motion.div
+              key={i} className="solution-card" variants={fadeUp}
+              whileHover={{ y: -6, boxShadow: '0 16px 48px rgba(12, 26, 53, 0.14)' }}
+              transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+            >
+              <img src={card.img} alt={card.title} className="solution-card-image" />
+              <div className="solution-card-content">
+                <h3>{card.title}</h3>
+                <p>{card.desc}</p>
+                <a href="#" className="solution-link">Learn More <FaArrowRight /></a>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </motion.div>
 
-      {/* 8. AI SOLUTIONS SECTION */}
-      <div ref={solutionsRef} className={`ai-solutions-section fade-in-section ${solutionsIsVisible ? 'is-visible' : ''}`}>
-        <h2>Our Saree AI Toolkit</h2>
-        <p className="section-subtitle">
-          Discover our suite of specialized AI tools, built from the ground up
-          for textile and ethnic wear design.
-        </p>
-        <div className="solutions-grid">
-          <div className="solution-card">
-            <img src={sideGalleryImages[0]} alt="AI Motif Generator" className="solution-card-image" />
-            <div className="solution-card-content">
-              <h3>AI Motif Generator</h3>
-              <p>Create intricate new motifs (buttas, borders, pallus) from a simple text prompt.</p>
-              <a href="#" className="solution-link">Learn More <FaArrowRight /></a>
-            </div>
-          </div>
-          <div className="solution-card">
-            <img src={sideGalleryImages[1]} alt="Virtual Saree Draper" className="solution-card-image" />
-            <div className="solution-card-content">
-              <h3>Virtual Saree Draper</h3>
-              <p>See your generated design draped on a virtual model in real-time.</p>
-              <a href="#" className="solution-link">Learn More <FaArrowRight /></a>
-            </div>
-          </div>
-          <div className="solution-card">
-            <img src={sideGalleryImages[2]} alt="AI Colorway Creator" className="solution-card-image" />
-            <div className="solution-card-content">
-              <h3>AI Colorway Creator</h3>
-              <p>Instantly explore dozens of harmonious color combinations for your design.</p>
-              <a href="#" className="solution-link">Learn More <FaArrowRight /></a>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* ── 9. GALLERY ───────────────────────────────────────────────────────── */}
+      <motion.div
+        className="gallery-of-innovation"
+        variants={stagger}
+        initial="hidden"
+        whileInView="visible"
+        viewport={VP}
+      >
+        <motion.div variants={fadeUp}>
+          <span className="section-eyebrow">Our Gallery</span>
+          <h2>Gallery of Innovation</h2>
+          <p className="section-subtitle">
+            Breathtaking Saree designs showcasing the fusion of AI creativity and traditional art.
+          </p>
+        </motion.div>
+        <motion.div className="static-gallery-grid" variants={staggerFast}>
+          {[...mockSareeImages.slice(0, 3), ...heroSareeImages.slice(0, 3)].map((src, i) => (
+            <motion.div
+              key={i} className={`static-gallery-item item-${i + 1}`} variants={fadeUp}
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+            >
+              <img src={src} alt={`Gallery ${i + 1}`} />
+            </motion.div>
+          ))}
+        </motion.div>
+      </motion.div>
 
-      {/* 9. GALLERY OF INNOVATION SECTION */}
-      <div ref={galleryRef} className={`gallery-of-innovation fade-in-section ${galleryIsVisible ? 'is-visible' : ''}`}>
-        <h2>Gallery of Innovation</h2>
-        <p className="section-subtitle">A collection of breathtaking Saree designs showcasing the fusion of AI creativity and traditional art.</p>
-        <div className="static-gallery-grid">
-          <div className="static-gallery-item item-1"><img src={mockSareeImages[0]} alt="Saree Design 1" /></div>
-          <div className="static-gallery-item item-2"><img src={mockSareeImages[1]} alt="Saree Design 2" /></div>
-          <div className="static-gallery-item item-3"><img src={mockSareeImages[2]} alt="Saree Design 3" /></div>
-          <div className="static-gallery-item item-4"><img src={heroSareeImages[0]} alt="Saree Design 4" /></div>
-          <div className="static-gallery-item item-5"><img src={heroSareeImages[1]} alt="Saree Design 5" /></div>
-          <div className="static-gallery-item item-6"><img src={heroSareeImages[2]} alt="Saree Design 6" /></div>
-        </div>
-      </div>
-
-      {/* 10. TESTIMONIAL SECTION */}
-      <div ref={testimonialRef} className={`testimonial-section fade-in-section ${testimonialIsVisible ? 'is-visible' : ''}`}>
+      {/* ── 10. TESTIMONIAL ──────────────────────────────────────────────────── */}
+      <motion.div
+        className="testimonial-section"
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={VP}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <div className="testimonial-quote-mark">&ldquo;</div>
         <p className="testimonial-quote">
-          "PyThani's AI helped me break a creative block. I generated a Pallu design
+          PyThani's AI helped me break a creative block. I generated a Pallu design
           I never would have thought of, and my weavers are already working on the sample.
-          A game-changer for independent designers!"
+          A game-changer for independent designers.
         </p>
         <div className="testimonial-author">
-          <img src="https://i.pravatar.cc/50?img=47" alt="Priya S." />
-          <span>Priya S, Designer</span>
+          <div>
+            <span className="author-name">Meera Krishnamurthy</span>
+            <span className="author-title">Independent Saree Designer, Chennai</span>
+          </div>
         </div>
         <div className="testimonial-dots">
-          <span className="dot active"></span>
-          <span className="dot"></span>
-          <span className="dot"></span>
+          <div className="dot active" />
+          <div className="dot" />
+          <div className="dot" />
         </div>
-      </div>
+      </motion.div>
 
-      {/* 11. About Us Section */}
-      <div id="about" ref={aboutRef} className={`about-us-section fade-in-section ${aboutIsVisible ? 'is-visible' : ''}`}>
-        <div className="about-image-gallery">
-          {sideGalleryImages.map((imgSrc, index) => (
-            <img key={index} src={imgSrc} alt={`PyThani example ${index + 1}`} className="gallery-image" />
+      {/* ── 11. ABOUT ──────────────────────────────────────────────────────── */}
+      <motion.div
+        className="about-us-section"
+        variants={stagger}
+        initial="hidden"
+        whileInView="visible"
+        viewport={VP}
+      >
+        <motion.div className="about-image-gallery" variants={fadeLeft}>
+          {heroSareeImages.slice(0, 4).map((img, i) => (
+            <img key={i} src={img} alt="Saree" className="gallery-image" loading="lazy" />
           ))}
-        </div>
-        <div className="about-content">
-          <h2>About PyThani</h2>
+        </motion.div>
+        <motion.div className="about-content" variants={fadeRight}>
+          <span className="section-eyebrow">About pAIThani</span>
+          <h2>Weaving Heritage with Intelligence</h2>
           <p>
-            At PyThani, we believe in the timeless beauty of the Saree. Our name, a blend of
-            'Python' (the language of AI) and 'Paithani' (a traditional weave),
-            represents our mission: to merge cutting-edge technology with heritage crafts.
+            pAIThani was born from a simple question: what if AI could learn the grammar
+            of Paithani weaving — its motifs, its colours, its centuries of meaning — and
+            help designers speak it fluently?
           </p>
           <p>
-            We empower artisans and designers by providing AI tools that inspire creativity,
-            preserve traditional knowledge, and open new possibilities for Saree design.
+            Our platform trains on thousands of authenticated Paithani textiles,
+            preserving the tradition while empowering a new generation of creators.
           </p>
-        </div>
-      </div>
+          <motion.button
+            className="get-started-button"
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => document.getElementById('prompt-input')?.focus()}
+          >
+            Start Creating →
+          </motion.button>
+        </motion.div>
+      </motion.div>
 
-      {/* 12. FINAL CTA SECTION */}
-      <div ref={finalCtaRef} className={`final-cta-section fade-in-section ${finalCtaIsVisible ? 'is-visible' : ''}`}>
-        <div className="final-cta-content">
-          <h2>Start Designing Your Saree Today</h2>
+      {/* ── 12. FINAL CTA ──────────────────────────────────────────────────── */}
+      <motion.div
+        className="final-cta-section"
+        variants={stagger}
+        initial="hidden"
+        whileInView="visible"
+        viewport={VP}
+      >
+        <motion.div className="final-cta-content" variants={fadeLeft}>
+          <span className="section-eyebrow section-eyebrow--light">Get Started Today</span>
+          <h2>Ready to Design Your Masterpiece?</h2>
           <p>
-            Ready to create your own masterpiece? Use our AI generator to bring your
-            perfect Saree design to life. Sign up for free and start generating.
+            Join artisans and designers using pAIThani to create
+            stunning Paithani designs that honour tradition and embrace the future.
           </p>
-          <button className="btn btn-primary" onClick={scrollToSearch}>Get Started for Free</button>
-        </div>
-        <div className="final-cta-image">
-          <img src="https://images.unsplash.com/photo-1710967357101-843e3a9ac9ee?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTg0fHxzYXJlZSUyMGltYWdlJTIwaW4lMjB3aGl0ZSUyMGJhY2tncm91bmR8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600" alt="Beautiful Saree" />
-        </div>
-      </div>
-
-      {/* SAREE DETAIL MODAL */}
-      <SareeDetailModal
-        isOpen={!!modalData}
-        onClose={handleCloseModal}
-        imageUrl={modalData?.imageUrl}
-        price={modalData?.price}
-        isLoggedIn={isLoggedIn}
-        onAddToCart={onAddToCart}
-      />
+          <motion.button
+            className="btn-cta-gold"
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => document.getElementById('prompt-input')?.focus()}
+          >
+            Generate Your First Design ✦
+          </motion.button>
+        </motion.div>
+        <motion.div className="final-cta-image" variants={fadeRight}>
+          <img
+            src={heroSareeImages[0] || mockSareeImages[0]}
+            alt="Paithani saree"
+          />
+        </motion.div>
+      </motion.div>
 
     </div>
   );

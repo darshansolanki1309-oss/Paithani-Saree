@@ -1,15 +1,24 @@
-/* 1. Navbar Container */
+/* Navbar */
 .navbar {
-  background-color: var(--light-bg);
-  border-bottom: 1px solid var(--gray-light);
+  background-color: var(--bg-white);
+  border-bottom: 1px solid var(--border-light);
   height: 80px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1rem;
   position: sticky;
   top: 0;
   z-index: 999;
+  transition: background-color 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+/* Glassmorphism on scroll */
+.navbar-scrolled {
+  background-color: rgba(253, 251, 248, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 1px 0 rgba(26, 16, 10, 0.06), 0 4px 24px rgba(12, 26, 53, 0.07);
+  border-bottom-color: transparent;
 }
 
 .navbar-container {
@@ -22,24 +31,19 @@
   padding: 0 2rem;
 }
 
-/* --- THIS BLOCK IS CHANGED --- */
-/* 2. Logo */
+/* Logo */
 .navbar-logo-link {
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 100%; /* Make the link fill the 80px height */
+  height: 100%;
 }
-
 .navbar-logo-image {
-  height: 60px; /* FIXED: Set to 60px (less than the 80px navbar) */
+  height: 56px;
   width: auto;
   object-fit: contain;
 }
-/* --- END OF CHANGE --- */
 
-
-/* 3. NEW Center Navigation Links */
+/* Center nav links */
 .nav-menu-center {
   display: flex;
   list-style: none;
@@ -47,79 +51,72 @@
 }
 
 .nav-links-center {
-  color: var(--gray-medium);
+  color: var(--text-muted);
   text-decoration: none;
   font-weight: 500;
+  font-size: 0.92rem;
   font-family: 'Inter', sans-serif;
-  transition: color 0.3s ease;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: color 0.25s ease;
+  position: relative;
+  padding-bottom: 2px;
 }
 
+/* Gold underline slide */
+.nav-links-center::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 0;
+  height: 1px;
+  background: var(--gold);
+  transition: width 0.3s ease;
+}
 .nav-links-center:hover {
-  color: var(--dark-text);
+  color: var(--text-primary);
+}
+.nav-links-center:hover::after {
+  width: 100%;
 }
 
-/* 4. Right Side Icons */
+/* Right icons */
 .nav-icons {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
-.nav-icon-link,
-.cart-button {
-  color: var(--dark-text);
-  font-size: 1.25rem;
-  transition: color 0.2s ease;
-  position: relative; 
-  display: flex;
-  align-items: center;
-}
-
+.nav-icon-button,
 .cart-button {
   background: none;
   border: none;
   cursor: pointer;
+  color: var(--text-primary);
+  font-size: 1.2rem;
   padding: 0;
+  display: flex;
+  align-items: center;
+  position: relative;
 }
 
-.nav-icon-link:hover,
-.cart-button:hover {
-  color: var(--gray-medium);
-}
-
-/* 5. Cart Badge */
+/* Gold cart badge */
 .cart-badge {
   position: absolute;
-  top: -8px;
-  right: -10px;
-  background-color: var(--dark-text);
-  color: var(--light-bg);
+  top: -7px;
+  right: -9px;
+  background: var(--gold);
+  color: #fff;
   border-radius: 50%;
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
   font-family: 'Inter', sans-serif;
-}
-
-/* 6. Clerk User Button / Icon */
-.nav-icon-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--dark-text);
-  font-size: 1.25rem;
-  transition: color 0.2s ease;
-  padding: 0;
-  display: flex;
-  align-items: center;
-}
-
-.nav-icon-button:hover {
-  color: var(--gray-medium);
 }
 
 .nav-user-button {
@@ -127,12 +124,8 @@
   align-items: center;
 }
 
-/* 7. Responsive: Hide center links on mobile */
+/* Responsive */
 @media (max-width: 768px) {
-  .nav-menu-center {
-    display: none;
-  }
-  .navbar-container {
-    justify-content: space-between;
-  }
+  .nav-menu-center { display: none; }
+  .navbar-container { justify-content: space-between; }
 }
