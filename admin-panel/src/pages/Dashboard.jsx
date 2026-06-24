@@ -84,4 +84,8 @@ function Dashboard() {
           </ResponsiveContainer>
         </div>
       </div>
-    </div>
+    </div>
+  )
+}
+
+export default Dashboard;
