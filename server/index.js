@@ -17,7 +17,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(cors());
 
 // --- 2. MONGODB CONNECTION ---
-const MONGO_URI = "mongodb://localhost:27017/pythaniDB";
+const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/pythaniDB";
 
 mongoose.connect(MONGO_URI)
   .then(() => console.log("Successfully connected to MongoDB!"))
